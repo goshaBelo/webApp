@@ -2,6 +2,7 @@ import * as express from "express"
 import {authMiddleware} from "../middleware/auth_middleware"
 import * as uniqid from "uniqid"
 import {postgresClient} from "../postgre/postgresClient"
+import {adminMiddleware} from "../middleware/admin_middleware"
 
 class GroupsController{
 	path = "/groups"
@@ -12,7 +13,10 @@ class GroupsController{
 
 	private initRoutes(){
 		this.router.post(this.path, authMiddleware, this.createGroup)
+		this.router.post(`${this.path}/:id`, authMiddleware, this.alterGroupById)
 		this.router.get(this.path, authMiddleware, this.getAllGroups)
+		this.router.get(`${this.path}/:id`, authMiddleware, this.getGroupById)
+		this.router.get(`${this.path}/:id/suggestions`, authMiddleware, adminMiddleware, this.getGroupSuggestions)
 	}
 
 	private createGroup = async(request, response)=>{
@@ -33,10 +37,40 @@ class GroupsController{
 
 	private getAllGroups = async(request, response)=>{
 		try{
+			//console.log("getAllGroups")
 			let groups = (await postgresClient.query(`SELECT * FROM groups;`)).rows
 			response.send(groups)
 		}catch(error){
 			console.log(error)
+		}
+	}
+
+	private getGroupById = async(request, response)=>{
+		try{
+			//console.log("getGroupById")
+			let group_id = request.params.id
+			let group = (await postgresClient.query(`SELECT * FROM groups WHERE id='${group_id}';`)).rows
+			response.send(group)
+
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	private alterGroupById = async(request, response)=>{
+		try{
+			console.log(request.query)
+
+		}catch(error){
+
+		}
+	}
+
+	private getGroupSuggestions = async(request, response)=>{
+		try{
+
+		}catch(error){
+
 		}
 	}
 }
