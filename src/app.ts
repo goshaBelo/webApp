@@ -20,13 +20,19 @@ class App{
 	}
 
 	private connectDataBase(){
-		postgresClient.connect(function(err){
-			if(err){
-				throw err
-			}else{
-				console.log("Connected!")
-			}
-		})
+		try{
+			postgresClient.connect(function(err){
+				if(err){
+					throw err
+				}else{
+					console.log("Connected!")
+				}
+			})
+
+		}catch(error){
+			console.log(error)
+
+		}
 	}
 
 	private initMiddlewares(){

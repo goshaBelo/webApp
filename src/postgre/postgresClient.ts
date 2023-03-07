@@ -11,12 +11,18 @@ const postgresClient = new Client({
 export{postgresClient}
 
 
-function f(client){
-	client.connect(function(err) {
-		if (err) throw err;
-		console.log("Connected!");
-	});
+// async function f(client){
+// 	await client.connect(function(err) {
+// 		if (err) throw err;
+// 		console.log("Connected!");
+// 	});
 
-}
+// 	let res = await client.query('select * from posts;')
+// 	console.log(res)
+// }
+
+//f(postgresClient)
+
+
 
 

@@ -1,4 +1,5 @@
 import * as express from "express"
+import {postgresClient} from "../postgre/postgresClient"
 
 class PostsController{
 	path = "/posts"
@@ -12,8 +13,16 @@ class PostsController{
 		this.router.get(this.path, this.getAllPosts)
 	}
 
-	private getAllPosts(request, response){
-		response.send("all posts")
+	private async getAllPosts(request, response){
+		try{
+			let res = await postgresClient.query('select * from posts;')
+	        console.log(res.rows)
+		    response.send("all posts")
+
+		}catch(error){
+			console.log(error)
+
+		}
 	}
 }
 
