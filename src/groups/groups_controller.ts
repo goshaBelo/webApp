@@ -12,7 +12,7 @@ class GroupsController{
 
 	private initRoutes(){
 		this.router.post(this.path, authMiddleware, this.createGroup)
-		//this.router.get(this.path, authMiddleware, this.getAllGroups
+		this.router.get(this.path, authMiddleware, this.getAllGroups)
 	}
 
 	private createGroup = async(request, response)=>{
@@ -26,6 +26,15 @@ class GroupsController{
 			await postgresClient.query(`INSERT INTO group_admins(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 			await postgresClient.query(`INSERT INTO group_creators(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	private getAllGroups = async(request, response)=>{
+		try{
+			let groups = (await postgresClient.query(`SELECT * FROM groups;`)).rows
+			response.send(groups)
 		}catch(error){
 			console.log(error)
 		}
