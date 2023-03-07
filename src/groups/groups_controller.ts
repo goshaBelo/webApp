@@ -47,10 +47,26 @@ class GroupsController{
 
 	private getGroupById = async(request, response)=>{
 		try{
-			//console.log("getGroupById")
 			let group_id = request.params.id
-			let group = (await postgresClient.query(`SELECT * FROM groups WHERE id='${group_id}';`)).rows
-			response.send(group)
+			let user = request.user
+			let action = request.query.action
+			if(action=="subscribe"){
+				let userInGroup = (await postgresClient.query(
+					`SELECT * FROM group_members WHERE user_id='${user.id}' AND group_id='${group_id}';`
+					)).rows[0]
+				if(userInGroup){
+					response.send("already subscribed")
+				}else{
+					await postgresClient.query(
+						`INSERT INTO group_members (user_id, group_id) VALUES ('${user.id}','${group_id}');`
+						)
+				    response.send("subscribed")
+				}
+
+			}else{
+			    let group = (await postgresClient.query(`SELECT * FROM groups WHERE id='${group_id}';`)).rows
+			    response.send(group)
+			}
 
 		}catch(error){
 			console.log(error)

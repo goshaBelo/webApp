@@ -1,6 +1,7 @@
 import * as express from "express"
 import {postgresClient} from "../postgre/postgresClient"
 import * as uniqid from "uniqid"
+import * as jwt from  "jsonwebtoken"
 
 class AuthenticationController{
 	path="/auth"
@@ -16,18 +17,23 @@ class AuthenticationController{
 
 	private login = async(request, response)=>{
 		try{
-			console.log(request.body)
+			
 			let email = request.body.email
 			let password = request.body.password
 			let user = (await postgresClient.query(`SELECT * FROM users WHERE email='${email}';`)).rows[0]
+			
 			if(user){
-				response.send("user whith this email dont found")
-			}else{
 				if(user.password==password){
+					let token = this.createToken(user)
+					let cookie = this.createCookie(token)
+					response.setHeader("Set-Cookie", cookie)
 					response.send("auth Ok")
 				}else{
 					response.send("wrong password")
 				}
+				
+			}else{
+				response.send("user with this email not found")
 			}
 		}catch(error){
 			console.log(error)
@@ -57,6 +63,19 @@ class AuthenticationController{
 		}catch(error){
 			console.log(error)
 		}
+	}
+
+	private createToken(user){
+		let token = jwt.sign({
+			id: user.id
+		}, "SECRET_KEY")
+
+		return token
+	}
+
+	private createCookie(token){
+		let cookie = `Authentication=${token}`
+		return cookie
 	}
 }
 
