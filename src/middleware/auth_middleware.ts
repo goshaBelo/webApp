@@ -7,8 +7,13 @@ async function authMiddleware(request, response, next){
 		let token = request.headers.authentication
 		if(token){
 			let dataFromToken = jwt.verify(token, "SECRET_KEY")
-			let user = (await postgresClient.query(`SELECT * FROM users WHERE id='${dataFromToken.id}2';`)).rows[0]
+			let user = (await postgresClient.query(`SELECT * FROM users WHERE id='${dataFromToken.id}';`)).rows[0]
 			if(user){
+				request.user={
+					id: user.id,
+					name: user.name,
+					email: user.email
+				}
 				next()
 			}else{
 				response.send("authentication error2")
