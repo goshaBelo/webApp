@@ -30,6 +30,8 @@ class GroupsController{
 			await postgresClient.query(`INSERT INTO group_admins(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 			await postgresClient.query(`INSERT INTO group_creators(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 
+			response.send("created group")
+
 		}catch(error){
 			console.log(error)
 		}
@@ -84,6 +86,9 @@ class GroupsController{
 
 	private getGroupSuggestions = async(request, response)=>{
 		try{
+			let group_id = request.params.id
+			let suggestions = (await postgresClient.query(`SELECT * FROM group_suggestions WHERE group_id='${group_id}';`)).rows
+			response.send(suggestions)
 
 		}catch(error){
 

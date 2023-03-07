@@ -9,6 +9,7 @@ async function adminMiddleware(request, response, next){
 		let admin = (await postgresClient.query(
 			`SELECT * FROM group_admins WHERE group_id='${group_id}' AND user_id='${user.id}';`)).rows[0]
 		if(admin){
+			console.log("admin adminMiddleware OK")
 			next()
 		}else{
 			response.send("Error/you are not admin of this group/ Error")
