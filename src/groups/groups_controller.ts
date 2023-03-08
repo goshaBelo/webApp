@@ -23,15 +23,21 @@ class GroupsController{
 		try{
 			let user = request.user
 			let group_data = request.body.group_data
-			//console.log(group_data)
+			await this.createGroupService(user, group_data)
+			response.send("group created")
+
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	private createGroupService = async(user, group_data)=>{
+		try{
 			let group_id = uniqid()
 			let group = await postgresClient.query(`INSERT INTO groups (id, name) VALUES ('${group_id}', '${group_data.name}');`)
 			await postgresClient.query(`INSERT INTO group_members(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 			await postgresClient.query(`INSERT INTO group_admins(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
 			await postgresClient.query(`INSERT INTO group_creators(user_id, group_id) VALUES ('${user.id}', '${group_id}');`)
-
-			response.send("created group")
-
 		}catch(error){
 			console.log(error)
 		}
@@ -53,23 +59,30 @@ class GroupsController{
 			let user = request.user
 			let action = request.query.action
 			if(action=="subscribe"){
-				let userInGroup = (await postgresClient.query(
-					`SELECT * FROM group_members WHERE user_id='${user.id}' AND group_id='${group_id}';`
-					)).rows[0]
-				if(userInGroup){
-					response.send("already subscribed")
-				}else{
-					await postgresClient.query(
-						`INSERT INTO group_members (user_id, group_id) VALUES ('${user.id}','${group_id}');`
-						)
-				    response.send("subscribed")
-				}
-
+				this.subscribeUserOnGroupService(user, group_id, response)
 			}else{
 			    let group = (await postgresClient.query(`SELECT * FROM groups WHERE id='${group_id}';`)).rows
 			    response.send(group)
 			}
 
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	private subscribeUserOnGroupService = async(user, group_id, response)=>{
+		try{
+			let userInGroup = (await postgresClient.query(
+				`SELECT * FROM group_members WHERE user_id='${user.id}' AND group_id='${group_id}';`
+				)).rows[0]
+			if(userInGroup){
+				response.send("already subscribed")
+			}else{
+				await postgresClient.query(
+					`INSERT INTO group_members (user_id, group_id) VALUES ('${user.id}','${group_id}');`
+					)
+				response.send("subscribed")
+			}
 		}catch(error){
 			console.log(error)
 		}

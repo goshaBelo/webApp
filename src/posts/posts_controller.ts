@@ -15,14 +15,16 @@ class PostsController{
 	private initRoutes(){
 		this.router.get(`/groups/:group_id/${this.path}`, authMiddleware, this.initActionWithPosts)
 		this.router.get(`/groups/:group_id/${this.path}/:post_id`, authMiddleware, this.getPostById)
-		this.router.patch(`/groups/:id/${this.path}/:post_id`, authMiddleware, adminMiddleware, this.patchPostById)
+		this.router.patch(`/groups/:id/posts/:post_id`, authMiddleware, adminMiddleware, this.patchPostById)
 	}
 
+    //админ отклоняет или допускает предложенный пост до публикации
 	private patchPostById = async(request, response)=>{
 		try{
 			let post_id = request.params.post_id
 			let status = request.query.status
 			await postgresClient.query(`UPDATE posts SET post_status='${status}' WHERE id='${post_id}';`)
+			await postgresClient.query(`DELETE FROM group_suggestions WHERE post_id='${post_id}';`)
 			response.send("updated")
 
 		}catch(error){
@@ -61,6 +63,8 @@ class PostsController{
 		}
 	}
 
+    
+    //позволяет пользлвателям, состоящим в группе, предлагать новые посты
 	private suggestPost = async(request, response)=>{
 		try{
 			let postData = request.body.postData
